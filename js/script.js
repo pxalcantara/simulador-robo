@@ -58,48 +58,59 @@ function getGlobalPosition () {
   console.log('position', position)
   switch (direction) {
     case globalFrame.north:
-      // elementPosition = window.getComputedStyle(mobileImg, null).getPropertyValue("bottom").slice(0,-2);
-      position = getVerticalPosition();
-      // position = elementPosition;
+      elementPosition = window.getComputedStyle(mobileImg, null).getPropertyValue("top").slice(0,-2);
+      position = parseInt(elementPosition);
       break;
     case globalFrame.west:
-      // elementPosition = window.getComputedStyle(mobileImg, null).getPropertyValue("right").slice(0,-2);
-      position = getHorizontalPosition();
-      // position = elementPosition;
+      elementPosition = window.getComputedStyle(mobileImg, null).getPropertyValue("left").slice(0,-2);
+      position = parseInt(elementPosition);
       break;   
     case globalFrame.south:
-      // elementPosition = window.getComputedStyle(mobileImg, null).getPropertyValue("top").slice(0,-2); 
-      position = getVerticalPosition();
-      // position = elementPosition;
+      elementPosition = window.getComputedStyle(mobileImg, null).getPropertyValue("top").slice(0,-2); 
+      position = parseInt(elementPosition);
       break;
     case globalFrame.east:
-      // elementPosition = window.getComputedStyle(mobileImg, null).getPropertyValue("left").slice(0,-2);
-      position = getHorizontalPosition();
-      // position = elementPosition;
+      elementPosition = window.getComputedStyle(mobileImg, null).getPropertyValue("left").slice(0,-2);
+      position = parseInt(elementPosition);
       break;      
   }
 }
 
-function getHorizontalPosition() {
-  return parseInt(mobileImg.style.right.split('px')[0]) || 2;
-}
+// function getHorizontalPosition() {
+//   return parseInt(mobileImg.style.right.split('px')[0]) || 2;
+// }
 
-function getVerticalPosition() {
-  return parseInt(mobileImg.style.top.split('px')[0]) || 2;
-}
+// function getVerticalPosition() {
+//   return parseInt(mobileImg.style.top.split('px')[0]) || 2;
+// }
 
 function move(distance) {
   timer = setInterval(increaseDistance, 50)
   let localPosition = position;
-  
+  let final
+  if (direction === globalFrame.east || direction === globalFrame.south) {
+    final = position + distance
+  } else {
+    final = position - distance
+  }
+  console.log('final', final)
   function increaseDistance() {
-    // localPosition = localPosition + 5;
+    getGlobalPosition()
     console.log('move', localPosition);
-    if (localPosition >= (position + distance)) {
-      clearInterval(timer);
-      rotate(90);
-      return 
+    if (direction === globalFrame.east || direction === globalFrame.south) {
+      if (localPosition >= (final)) {
+        clearInterval(timer);
+        // rotate(90);
+        return 
+      }
+    } else {
+      if (localPosition <= (final)) {
+        clearInterval(timer);
+        // rotate(90);
+        return 
+      }
     }
+    
 
    
     switch (direction) {
@@ -107,23 +118,20 @@ function move(distance) {
         console.log('north');
         localPosition = localPosition - 5;
         mobileImg.style.top = `${localPosition}px`;
-        // mobileImg.style.transform = `translate(0,${localPosition}px)`
         break;
       case globalFrame.west:
         console.log('west');
         localPosition = localPosition - 5;
         mobileImg.style.left = `${localPosition}px`;
-        // mobileImg.style.transform = `translate(${localPosition}px,0)`
+
         break;   
       case globalFrame.south:
         localPosition = localPosition + 5;
         mobileImg.style.top = `${localPosition}px`;
-        // mobileImg.style.transform = `translate(0,${localPosition}px)`
         break;
       case globalFrame.east:
         localPosition = localPosition + 5;
         mobileImg.style.left = `${localPosition}px`;
-        // mobileImg.style.transform = `translate(${localPosition}px,0)`
         break;      
     }
   }   
@@ -188,10 +196,13 @@ function runCommands(event) {
   event.preventDefault()
   // console.log(timer)
   // moveForward();
+  // elementPosition = window.getComputedStyle(mobileImg, null).getPropertyValue("left").slice(0,-2);
   getGlobalPosition();
-  let x = position;
+  // x = x + 10;
+  // mobileImg.style.left = `${x}px`;
+  move(50)
   
-  move(200)
+  // console.log('position', position, x, elementPosition);
   // rotate(90);
   // for (const command of commands) {
   //   console.log(command)
@@ -200,7 +211,8 @@ function runCommands(event) {
 }
 
 forwardCommand.addEventListener('click', () => {
-  addCommand("frente");
+  // addCommand("frente");
+  rotate(90);
 })
 
 rightCommand.addEventListener('click', () => {

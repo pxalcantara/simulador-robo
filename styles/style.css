@@ -91,5 +91,5 @@ main {
 
   position: absolute;
   left: 100px;
-  transform: rotate(180deg);
+  /* transform: rotate(180deg); */
 }
