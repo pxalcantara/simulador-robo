@@ -15,11 +15,12 @@ const globalFrame = {
   west: 'west'
 };
 
-let timer
 let direction = globalFrame.east;
 let angle = 0;
+let position = 0;
+let commandsIndex = 0;
+let timer
 
-position = 0;
 
 function addCommand (commandType) {
   img = document.createElement('img');
@@ -55,7 +56,7 @@ function addCommand (commandType) {
 // }
 
 function getGlobalPosition () {
-  console.log('position', position)
+  // console.log('position', position)
   switch (direction) {
     case globalFrame.north:
       elementPosition = window.getComputedStyle(mobileImg, null).getPropertyValue("top").slice(0,-2);
@@ -76,13 +77,26 @@ function getGlobalPosition () {
   }
 }
 
-// function getHorizontalPosition() {
-//   return parseInt(mobileImg.style.right.split('px')[0]) || 2;
-// }
+function executeCommand () {
+  if (commandsIndex === commands.length) {
+    return
+  }
+  
+  getGlobalPosition();
+  switch (commands[commandsIndex]) {
+    case 'frente':
+      moveForward();
+      break;
+    case 'direita':
+      rotate(90, true);
+      break;
+    case 'esquerda':
+      rotate(-90, false);
+      break
+  }
 
-// function getVerticalPosition() {
-//   return parseInt(mobileImg.style.top.split('px')[0]) || 2;
-// }
+  commandsIndex++;
+}
 
 function move(distance) {
   timer = setInterval(increaseDistance, 50)
@@ -96,31 +110,27 @@ function move(distance) {
   console.log('final', final)
   function increaseDistance() {
     getGlobalPosition()
-    console.log('move', localPosition);
+    // console.log('move', localPosition);
     if (direction === globalFrame.east || direction === globalFrame.south) {
       if (localPosition >= (final)) {
         clearInterval(timer);
-        // rotate(90);
+        executeCommand();
         return 
       }
     } else {
       if (localPosition <= (final)) {
         clearInterval(timer);
-        // rotate(90);
+        executeCommand();
         return 
       }
     }
-    
-
-   
+       
     switch (direction) {
       case globalFrame.north:
-        console.log('north');
         localPosition = localPosition - 5;
         mobileImg.style.top = `${localPosition}px`;
         break;
       case globalFrame.west:
-        console.log('west');
         localPosition = localPosition - 5;
         mobileImg.style.left = `${localPosition}px`;
 
@@ -170,49 +180,58 @@ function changeOrientation(isClockwise) {
   }
 }
 
-function rotate(angleDistance) {
+function rotate(angleDistance, isClockwise) {
   timer = setInterval(increaseAngle, 50);
   let localAngle = angle;
   console.log('rotate');
+
   function increaseAngle() {
-    localAngle += 2;
-    if(localAngle >= (angle + angleDistance)) {
-      angle = localAngle;
-      changeOrientation(true)
-      console.log('direction', direction);
-      clearInterval(timer);
-      return
+    if (isClockwise) {
+      localAngle += 2;
+
+      if(localAngle >= (angle + angleDistance)) {
+        angle = localAngle;
+        changeOrientation(isClockwise)
+        console.log('direction', direction);
+        clearInterval(timer);
+        executeCommand();
+        return
+      }
+    } else {
+      localAngle -= 2;
+
+      if(localAngle <= (angle + angleDistance)) {
+        angle = localAngle;
+        changeOrientation(isClockwise)
+        console.log('direction', direction);
+        clearInterval(timer);
+        executeCommand();
+        return
+      }
     }
+
     mobileImg.style.transform = `rotate(${localAngle}deg)`
   }
 }
 
 function moveForward() {
   let distance = 0;
-  move();
+  move(100);
 }
 
 function runCommands(event) {
   event.preventDefault()
-  // console.log(timer)
-  // moveForward();
-  // elementPosition = window.getComputedStyle(mobileImg, null).getPropertyValue("left").slice(0,-2);
+  commandsIndex = 0;
   getGlobalPosition();
-  // x = x + 10;
-  // mobileImg.style.left = `${x}px`;
-  move(50)
+  executeCommand();
   
-  // console.log('position', position, x, elementPosition);
-  // rotate(90);
-  // for (const command of commands) {
-  //   console.log(command)
-  //   moveForward();
-  // }
+  // move(50)
+  // rotate(-90, false);
+
 }
 
 forwardCommand.addEventListener('click', () => {
-  // addCommand("frente");
-  rotate(90);
+  addCommand("frente");
 })
 
 rightCommand.addEventListener('click', () => {

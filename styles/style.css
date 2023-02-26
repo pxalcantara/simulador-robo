@@ -78,7 +78,6 @@ main {
 
 .map {
   width: 80vw;
-  height: 100vh;
   position: relative;
 
   padding: 16px;
@@ -91,5 +90,5 @@ main {
 
   position: absolute;
   left: 100px;
-  /* transform: rotate(180deg); */
+  /* transform: rotate(-90deg); */
 }
