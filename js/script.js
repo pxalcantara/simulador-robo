@@ -26,34 +26,22 @@ function addCommand (commandType) {
   img = document.createElement('img');
   img.src = `./assets/${commandType}.svg`;
   img.classList.add('cmd-img');
+  
+  img.addEventListener('click', (event) => {
+    event.target.remove();
+  })
 
   commandsContainer.append(img);
+
 
   commands.push(commandType);
 }
 
-// function increaseDistance(start, final) {
-//   position = position + 5;
-//   if (position == final) {
-//     clearInterval(timer);
-//     return 
-//   }
-  
-//   switch (direction) {
-//     case 'north':
-//       mobileImg.style.bottom = `${position}px`;
-//       break;
-//     case 'west':
-//       mobileImg.style.right = `${position}px`;
-//       break;   
-//     case 'south':
-//       mobileImg.style.top = `${position}px`;
-//       break;
-//     case 'east':
-//       mobileImg.style.left = `${position}px`;
-//       break;      
-//   }
-// }
+function clearCommand () {
+  commandsContainer.innerHTML = '';
+  commands.length = 0;
+}
+
 
 function getGlobalPosition () {
   // console.log('position', position)
@@ -79,6 +67,7 @@ function getGlobalPosition () {
 
 function executeCommand () {
   if (commandsIndex === commands.length) {
+    clearCommand()
     return
   }
   
