@@ -26,25 +26,38 @@ function addCommand (commandType) {
   img = document.createElement('img');
   img.src = `./assets/${commandType}.svg`;
   img.classList.add('cmd-img');
+  img.setAttribute('id',`cmd-${commandsIndex}`);
   
   img.addEventListener('click', (event) => {
-    event.target.remove();
-  })
+    // event.target.remove();
+    console.log(event.target.id);
+    removeCommand(event.target.id);
+    console.log(commands);
+    })
 
   commandsContainer.append(img);
-
-
   commands.push(commandType);
+
+  commandsIndex++;
 }
 
 function clearCommand () {
   commandsContainer.innerHTML = '';
   commands.length = 0;
+  commandsIndex = 0;
+}
+
+function removeCommand(id) {
+  cmd = document.querySelector('#'+id);
+  index = id.replace('cmd-','');
+  console.log(index);
+  
+  commands[index] = '';
+  cmd.remove();
 }
 
 
 function getGlobalPosition () {
-  // console.log('position', position)
   switch (direction) {
     case globalFrame.north:
       elementPosition = window.getComputedStyle(mobileImg, null).getPropertyValue("top").slice(0,-2);
@@ -66,7 +79,8 @@ function getGlobalPosition () {
 }
 
 function executeCommand () {
-  if (commandsIndex === commands.length) {
+  console.log('comandIndex', commandsIndex)
+  if (commandsIndex >= commands.length) {
     clearCommand()
     return
   }
@@ -81,6 +95,11 @@ function executeCommand () {
       break;
     case 'esquerda':
       rotate(-90, false);
+      break
+    case '':
+      console.log('sem comando');
+      commandsIndex++;
+      executeCommand();
       break
   }
 
