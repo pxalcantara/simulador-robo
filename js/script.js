@@ -21,6 +21,71 @@ let position = 0;
 let commandsIndex = 0;
 let timer
 
+// Create ros object to communicate over your Rosbridge connection
+const ros = new ROSLIB.Ros({ url : 'ws://localhost:9090' });
+const commands_ros = [];
+let cmd_position_reference = 0;
+let moving = false;
+const twist_msg = new ROSLIB.Message({
+  linear : {
+    x : 0.0,
+    y : 0.0,
+    z : 0.0
+  },
+  angular : {
+    x : 0.0,
+    y : 0.0,
+    z : 0.0
+  }
+});
+
+
+ros.on('connection', () => {
+  console.log("successful");
+});
+
+ros.on('error', (error) => {
+  console.log(`errored out (${error})`);
+});
+
+ros.on('close', () => {
+  console.log(`closed`);
+});
+
+// Create a listener for /my_topic
+const my_topic_listener = new ROSLIB.Topic({
+  ros,
+  name : "/my_topic",
+  messageType : "std_msgs/String"
+});
+
+// When we receive a message on /my_topic, add its data as a list item to the “messages" ul
+my_topic_listener.subscribe((message) => {
+  const title =  document.querySelector('h2');
+  title.innerText = message.data
+});
+
+const pose_subscriber = new ROSLIB.Topic({
+  ros,
+  name : "/turtle1/pose",
+  messageType : "turtlesim/Pose"
+});
+
+pose_subscriber.subscribe((message) => {
+  if (message.angular_velocity !== 0 || message.linear_velocity !== 0) {
+    console.log("Zero", message)
+    return
+  }
+  // console.log(message)
+})
+
+const cmd_vel_topic = new ROSLIB.Topic({
+  ros,
+  name : "/turtle1/cmd_vel",
+  messageType : "geometry_msgs/Twist"
+});
+
+
 
 function addCommand (commandType) {
   img = document.createElement('img');
@@ -193,6 +258,15 @@ function rotate(angleDistance, isClockwise) {
   let localAngle = angle;
   console.log('rotate');
 
+  twist_msg.angular.z = -1.55;
+  twist_msg.linear.x = 0.0;
+
+  if (!isClockwise) {
+    twist_msg.angular.z = -twist_msg.angular.z
+  }
+  
+  cmd_vel_topic.publish(twist_msg);
+
   function increaseAngle() {
     if (isClockwise) {
       localAngle += 2;
@@ -224,6 +298,10 @@ function rotate(angleDistance, isClockwise) {
 
 function moveForward() {
   let distance = 0;
+  twist_msg.angular.z = 0.0;
+  twist_msg.linear.x = 1.0;
+  cmd_vel_topic.publish(twist_msg);
+  console.log(twist_msg);
   move(100);
 }
 
