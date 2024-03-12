@@ -1,3 +1,4 @@
+
 const commandsContainer = document.querySelector('.commands-container');
 
 const forwardCommand = document.querySelector('#forward');
@@ -85,6 +86,42 @@ const cmd_vel_topic = new ROSLIB.Topic({
   messageType : "geometry_msgs/Twist"
 });
 
+let joy = nipplejs.create({
+  zone: document.getElementById('map'),
+  mode: 'static',
+  position: {right: '30%', bottom: '20%'},
+  color: 'blue',
+  size: 150
+});
+
+joy.on('start', (event, nipple) => {
+  console.log("Start Joy")
+  timer = setInterval(function () {
+    cmd_vel_topic.publish(twist_msg)
+  }, 1);
+})
+
+joy.on('move', (event, nipple) => {
+  max_linear = 1.0; // m/s
+  max_angular = 0.5; // rad/s
+  max_distance = 75.0; // pixels;
+  linear_speed = Math.sin(nipple.angle.radian) * max_linear * nipple.distance/max_distance;
+  angular_speed = -Math.cos(nipple.angle.radian) * max_angular * nipple.distance/max_distance;
+  console.log(linear_speed, angular_speed);
+  twist_msg.angular.z = angular_speed;
+  twist_msg.linear.x = linear_speed;
+  cmd_vel_topic.publish(twist_msg)
+})
+
+joy.on('end', (event, nipple) => {
+  console.log("End")
+  if (timer) {
+    clearInterval(timer)
+  }
+  twist_msg.angular.z = 0.0;
+  twist_msg.linear.x = 0.0;
+  cmd_vel_topic.publish(twist_msg)
+})
 
 
 function addCommand (commandType) {
@@ -264,7 +301,7 @@ function rotate(angleDistance, isClockwise) {
   if (!isClockwise) {
     twist_msg.angular.z = -twist_msg.angular.z
   }
-  
+
   cmd_vel_topic.publish(twist_msg);
 
   function increaseAngle() {
