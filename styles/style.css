@@ -96,6 +96,12 @@ main {
   cursor: pointer;
 }
 
+.reset-button {
+  position:absolute;
+  bottom: 40%;
+  right: 10%;
+}
+
 .commands-container {
   width: 100%;
 

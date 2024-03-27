@@ -5,9 +5,9 @@ const forwardCommand = document.querySelector('#forward');
 const leftCommand = document.querySelector('#left');
 const rightCommand = document.querySelector('#right');
 
-// const mobileImg = document.querySelector('.mobile-img');
+const resetButton = document.querySelector('.reset-button')
 const commandButton = document.querySelector('.cmd-button');
-
+const log = document.querySelector('#log')
 const commands = [];
 const globalFrame = {
   north: 'north',
@@ -23,7 +23,7 @@ let commandsIndex = 0;
 let timer
 
 // Create ros object to communicate over your Rosbridge connection
-const ros = new ROSLIB.Ros({ url : 'ws://localhost:9090' });
+const ros = new ROSLIB.Ros({ url : 'ws://192.168.1.9:9090' });
 const commands_ros = [];
 let cmd_position_reference = 0;
 let moving = false;
@@ -43,14 +43,17 @@ const twist_msg = new ROSLIB.Message({
 
 ros.on('connection', () => {
   console.log("successful");
+  log.innerHTML = 'successful'
 });
 
 ros.on('error', (error) => {
   console.log(`errored out (${error})`);
+  log.innerHTML = `errored out (${error})`
 });
 
 ros.on('close', () => {
   console.log(`closed`);
+  log.innerHTML = `closed`
 });
 
 // Create a listener for /my_topic
@@ -128,10 +131,16 @@ function checkMovement(msg) {
   if (msg.angular_velocity !== 0 || msg.linear_velocity !== 0) {
     return true;
   }
-
   return false;
 }
 
+let resetService = new ROSLIB.Service({
+  ros : ros,
+  name : '/reset',
+  serviceType : 'std_srvs/Empty'
+});
+
+let request = new ROSLIB.ServiceRequest({});
 
 function addCommand (commandType) {
   img = document.createElement('img');
@@ -233,3 +242,10 @@ leftCommand.addEventListener('click', () => {
 })
 
 commandButton.addEventListener('click', runCommands);
+
+resetButton.addEventListener('click', (event) => {
+  event.stopPropagation()
+  resetService.callService(request, function(result) {
+    console.log('Turtlesim Reseted');
+  });
+})
